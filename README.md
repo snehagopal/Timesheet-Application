@@ -64,8 +64,10 @@ Contributions are welcome! If you'd like to contribute to the development of thi
 4. Push your changes to your forked repository.
 5. Create a pull request to the main repository's `main` branch.
 
-##images
+**Images**
 <img width="960" alt="Screenshot 2023-08-21 174259" src="https://github.com/snehagopal/Timesheet-Application/assets/58037849/9edea3d2-e913-4e81-a209-498b9fbeb764">
+<img width="960" alt="Screenshot 2023-08-21 174808" src="https://github.com/snehagopal/Timesheet-Application/assets/58037849/7937864a-b565-4b17-8c38-8671ec9d3950">
+
 
 
 
