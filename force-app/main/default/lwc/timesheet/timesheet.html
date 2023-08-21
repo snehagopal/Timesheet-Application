@@ -1,0 +1,629 @@
+<template>
+    <lightning-card>
+       
+     <div class="user-info slds-p-around_medium slds-m-bottom_small">
+         <div class="user-icon">
+             <lightning-icon icon-name="utility:user" alternative-text="User Icon"></lightning-icon>
+         </div>
+         <div class="user-details slds-p-around_medium ">
+             <b><h2>{resourceName}</h2>
+             <h2>{resourceRole}</h2></b>
+         </div>
+     </div>
+     <template if:true={showTimesheet}>
+      <div class="slds-p-around_medium">
+         <lightning-tabset>
+             <lightning-tab label="TIMESHEET">
+                <div class="slds-p-around_medium slds-grid slds-gutters custom-gap">
+                        <h2 class="slds-p-right_small"><b>Role:</b></h2>
+                    <div class="slds-align-middle slds-p-right_small">
+                        <lightning-record-edit-form object-api-name="Timesheet__c">
+                            <lightning-input-field field-name="User__c" variant="label-hidden" onchange={handleResourceChange}></lightning-input-field>
+                        </lightning-record-edit-form>
+                    </div>
+                    <h2 class="slds-p-right_small"><b>Week:</b></h2>
+                    <lightning-icon icon-name="utility:right" size="x-small"></lightning-icon>
+                        <lightning-input type="date" variant="label-hidden" value={displayweekStartDate} onchange={handleInputDateChange}></lightning-input>                 
+                        <lightning-icon icon-name="utility:left" size="x-small"></lightning-icon>
+                      <div class="slds-p-right_small">
+                        <lightning-button label="Go" variant="brand"  onclick={handleGoClick}></lightning-button>
+                      </div>
+                      <div class="slds-p-around_medium search">
+                        <h2 class="slds-p-right_small"><b>Time Log Approval Status: </b>0 Pending 0 Submitted 0 Approved 0 Rejected</h2>
+                        <lightning-input type="search" placeholder="Search Keyword" onchange={handleSearch}></lightning-input>
+                        <lightning-button-icon icon-name="utility:settings" alternative-text="Settings"></lightning-button-icon>
+                        <lightning-button-icon icon-name="utility:filterList" alternative-text="Filter"></lightning-button-icon>                    
+                     </div>
+                 </div> 
+                 <div class="slds-p-around_medium">
+                <div class="slds-scrollable_x">
+                    <table class="slds-table slds-table_bordered slds-table_fixed-layout">
+                        <thead>
+                            <tr>
+                                <th>PROJECT</th>
+                                <th>PAN</th>
+                                <th>ACTION</th>
+                                <th></th>
+                                <th>ACTION<br/>COMPLETE</th>
+                                <th>HOURS</th>
+                                <th>ACTION<br/>COMPL.%</th>
+                                <th>TRACK<br/>TIME</th>
+                                <th>{monDate}<br/>MON</th>
+                                <th>{tueDate}<br/>TUE</th>
+                                <th>{wedDate}<br/>WED</th>
+                                <th>{thurDate}<br/>THU</th>
+                                <th>{friDate}<br/>FRI</th>
+                                <th>{satDate}<br/>SAT</th>
+                                <th>{sunDate}<br/>SUN</th>
+                                <th>TOTAL</th>
+                            </tr>
+                        </thead>
+                        <tbody> 
+                            <template for:each={taskToDisplay} for:item="taskPerDay">
+                                <tr key={taskPerDay.key}>
+                                    <td>
+                                        <a href="javascript:void(0);" data-project-id={taskPerDay.key.Project__r.Id} onclick={handleProjectClick}>
+                                          {taskPerDay.key.Project__r.Name}
+                                        </a>
+                                      </td>
+                                      <td>{taskPerDay.key.Action__r.PAN__c}</td>
+                                        <td>
+                                          <a href="javascript:void(0);" data-task-id={taskPerDay.key.Action__r.Id} onclick={handleTaskClick}>
+                                            {taskPerDay.key.Action__r.Name}
+                                          </a>
+                                        </td>
+                                        <td>
+                                          <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                        </td>
+                                        <td>
+                                          <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                        </td>
+                                        <td>
+                                          <p>Billable</p>
+                                        </td>
+                                        <td>
+                                          <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                        </td>
+                                        <td>
+                                          <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                        </td>
+                                        
+                                        <template for:each={taskPerDay.value} for:item="task" for:index="index">
+                                        
+                                        <td key={task.Id}>
+                                        <template if:true={task.Leave__c}>
+                                            <lightning-input type="number" variant="label-hidden"  min="8" max="24" value={task.Hours_Worked__c}  data-task-id={task.Task__c} data-day={task.Day_Date__c} onchange={handleWorkingHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={task.Leave__c}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24"  value={task.Hours_Worked__c}  data-task-id={task.Task__c} data-day={task.Day_Date__c} onchange={handleWorkingHourChange}></lightning-input>
+                                        </template>
+                                    
+                                    
+                                    </td>
+
+                               
+                                    <!--<td key={task.Id}>
+                                        <template if:true={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleTueHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleTueHourChange}></lightning-input>
+                                        </template>
+                                   </td>
+                                   <td key={task.Id}>
+                                    <template if:true={leaves.Wednesday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleWedHourChange} class="col-grey"></lightning-input>
+                                    </template>
+                                    <template if:false={leaves.Wednesday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleWedHourChange}></lightning-input>
+                                    </template>
+        
+                                </td>
+                                <td key={task.Id}>
+                                    <template if:true={leaves.Thursday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleThuHourChange} class="col-grey"></lightning-input>
+                                    </template>
+                                    <template if:false={leaves.Thursday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleThuHourChange}></lightning-input>
+                                    </template>
+                                    
+                                </td>
+                                <td key={task.Id}>
+                                    <template if:true={leaves.Friday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleFriHourChange} class="col-grey"></lightning-input>
+                                    </template>
+                                    <template if:false={leaves.Friday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleFriHourChange}></lightning-input>
+                                    </template> 
+                                </td>
+                                <td key={task.Id}>
+                                    <template if:true={leaves.Saturday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleSatHourChange} class="col-grey"></lightning-input>
+                                    </template>
+                                    <template if:false={leaves.Saturday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleSatHourChange}></lightning-input>
+                                    </template> 
+                                </td>
+                                <td key={task.Id}>
+                                    <template if:true={leaves.Sunday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleSunHourChange} class="col-grey"></lightning-input>
+                                    </template>
+                                    <template if:false={leaves.Sunday}>
+                                        <lightning-input type="number" variant="label-hidden" min="8" max="24"  value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleSunHourChange}></lightning-input>
+                                    </template> 
+                                </td>
+                            -->
+                                        </template>
+                                        
+                                        
+            
+                                            
+                               
+                                
+                                
+                                    <!--<td key={task.Id}>
+                                        <template if:true={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleTueHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.key.Action__r.Id} data-project-id={taskPerDay.key.Project__r.Id} onchange={handleTueHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    
+                                </template>-->
+                                        <td>
+                                          <div class="slds-p-around_medium">
+                                            <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                            {taskPerDay.key.Total_Hours_Worked__c}
+                                          </div>
+                                        </td>
+                                       <td>
+                                          <div class="slds-p-around_medium cursor">
+                                            <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.key.Id} onclick={handleEdit}></lightning-icon>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.key.Id} onclick={handleDelete}></lightning-icon>
+                                          </div>
+                                        </td>
+                                        <!--<td>
+                                          <a href="javascript:void(0);" data-project-id={taskPerDay.Project__r.Id} onclick={handleProjectClick}>
+                                            {taskPerDay.key.Project__r.Name}
+                                          </a>
+                                        </td>
+                                        <td>{taskPerDay.Action__r.PAN__c}</td>
+                                        <td>
+                                          <a href="javascript:void(0);" data-task-id={taskPerDay.Task__r.Id} onclick={handleTaskClick}>
+                                            {taskPerDay.Action__r.Name}
+                                          </a>
+                                        </td>
+                                        <td>
+                                          <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                        </td>
+                                        <td>
+                                          <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                        </td>
+                                        <td>
+                                          <p>Billable</p>
+                                        </td>
+                                        <td>
+                                          <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                        </td>
+                                        <td>
+                                          <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                        </td>
+                                        <td>
+                                          <div class="slds-p-around_medium">
+                                            <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                            {taskPerDay.Total_Hours_Worked__c}
+                                          </div>
+                                        </td>
+                                        <td>
+                                          <div class="slds-p-around_medium cursor">
+                                            <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleEdit}></lightning-icon>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleDelete}></lightning-icon>
+                                          </div>
+                                        </td>-->
+                                   
+                                </tr>
+                            </template>
+                    
+                                <!--<template for:each={tasks} for:item="taskPerDay">
+                                  <tr key={taskPerDay.Id}>
+                                    <td>
+                                      <a href="javascript:void(0);" data-project-id={taskPerDay.Project__r.Id} onclick={handleProjectClick}>
+                                        {taskPerDay.Project__r.Name}
+                                      </a>
+                                    </td>
+                                    <td>{taskPerDay.Task__r.PAN__c}</td>
+                                    <td>
+                                      <a href="javascript:void(0);" data-task-id={taskPerDay.Task__r.Id} onclick={handleTaskClick}>
+                                        {taskPerDay.Task__r.Name}
+                                      </a>
+                                    </td>
+                                    <td>
+                                      <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                    </td>
+                                    <td>
+                                      <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                      <p>Billable</p>
+                                    </td>
+                                    <td>
+                                      <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                      <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                    </td>-->
+                                    <!--<td>
+                                      <div class="slds-p-around_medium">
+                                        <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                        {taskPerDay.Total_Hours_Worked__c}
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div class="slds-p-around_medium cursor">
+                                        <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleEdit}></lightning-icon>
+                                        <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleDelete}></lightning-icon>
+                                      </div>
+                                    </td>
+                                  </tr>
+                                </template>-->
+                            
+                              
+                            <!--<template for:each={taskToDisplay} for:item="taskPerDay">
+                                <tr key={taskPerDay.Id}>
+                                    <td>
+                                        <a href="javascript:void(0);" data-project-id={taskPerDay.Project__r.Id} onclick={handleProjectClick}>
+                                            {taskPerDay.Project__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>{taskPerDay.Action__r.PAN__c}</td>
+                                    <td>
+                                        <a href="javascript:void(0);" data-task-id={taskPerDay.Action__r.Id} onclick={handleTaskClick}>
+                                            {taskPerDay.Action__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <p>Billable</p>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                    </td>-->
+                                   <!--<template for:each={taskPerDay.value} for:item="task">
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden"  min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange}></lightning-input>
+                                        </template>
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange}></lightning-input>
+                                        </template>
+            
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24"  value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                </template>-->
+                                    <!--<td>
+                                        <div class="slds-p-around_medium">
+                                            <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                            {taskPerDay.Total_Hours_Worked__c}
+                                        </div>
+                                        
+                                    </td>
+                                    <td>
+                                        <div class="slds-p-around_medium cursor">
+                                            <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleEdit}></lightning-icon>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleDelete}></lightning-icon>
+                                        </div>  
+                                    </td>
+                                </tr>
+                                </template>-->
+                            <!--<template for:each={taskToDisplay} for:item="taskPerDay">
+                                <tr key={taskPerDay.key.Id}>
+                                    <td>
+                                        <a href="javascript:void(0);" data-project-id={taskPerDay.Project__r.Id} onclick={handleProjectClick}>
+                                            {taskPerDay.key.Project__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>{taskPerDay.key.Action__r.PAN__c}</td>
+                                    <td>
+                                        <a href="javascript:void(0);" data-task-id={taskPerDay.Action__r.Id} onclick={handleTaskClick}>
+                                            {taskPerDay.key.Action__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <p>Billable</p>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                    </td>
+                                   <template for:each={taskPerDay.value} for:item="task">
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden"  min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange}></lightning-input>
+                                        </template>
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange}></lightning-input>
+                                        </template>
+            
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td key={task.Id}>
+                                        <template if:true={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24"  value={task.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                </template>
+                                    <td>
+                                        <div class="slds-p-around_medium">
+                                            <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                            {taskPerDay.Total_Hours_Worked__c}
+                                        </div>
+                                        
+                                    </td>
+                                    <td>
+                                        <div class="slds-p-around_medium cursor">
+                                            <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleEdit}></lightning-icon>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleDelete}></lightning-icon>
+                                        </div>  
+                                    </td>-->
+                                
+                            <!--<template for:each={tasksPerDay} for:item="taskPerDay">
+                                <tr key={taskPerDay.Id}>
+                                    <td>
+                                        <a href="javascript:void(0);" data-project-id={taskPerDay.Project__r.Id} onclick={handleProjectClick}>
+                                            {taskPerDay.Project__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>{taskPerDay.Action__r.PAN__c}</td>
+                                    <td>
+                                        <a href="javascript:void(0);" data-task-id={taskPerDay.Action__r.Id} onclick={handleTaskClick}>
+                                            {taskPerDay.Action__r.Name}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:task" size="x-small"></lightning-icon>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="checkbox" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <p>Billable</p>
+                                    </td>
+                                    <td>
+                                        <lightning-input type="number" variant="label-hidden"></lightning-input>
+                                    </td>
+                                    <td>
+                                        <lightning-icon class="slds-p-right_small slds-p-around_medium" icon-name="utility:clock" size="x-small"></lightning-icon>
+                                    </td>
+                                
+                                    <td>
+                                        <template if:true={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden"  min="8" max="24"  data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Monday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24"  data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleMonHourChange}></lightning-input>
+                                        </template>
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={tasks.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Tuesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={tasks.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleTueHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={tasks.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Wednesday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={tasks.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleWedHourChange}></lightning-input>
+                                        </template>
+            
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Thursday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleThuHourChange}></lightning-input>
+                                        </template>
+                                        
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Friday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleFriHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Saturday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSatHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td>
+                                        <template if:true={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24" value={taskPerDay.Hours_Worked__c} data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange} class="col-grey"></lightning-input>
+                                        </template>
+                                        <template if:false={leaves.Sunday}>
+                                            <lightning-input type="number" variant="label-hidden" min="8" max="24"  data-task-id={taskPerDay.Action__r.Id} data-project-id={taskPerDay.Project__r.Id} onchange={handleSunHourChange}></lightning-input>
+                                        </template> 
+                                    </td>
+                                    <td>
+                                        <div class="slds-p-around_medium">
+                                            <lightning-icon icon-name="utility:preview" alternative-text="Eye" size="x-small"></lightning-icon>
+                                            {taskPerDay.Total_Hours_Worked__c}
+                                        </div>
+                                        
+                                    </td>
+                                    <td>
+                                        <div class="slds-p-around_medium cursor">
+                                            <lightning-icon class="slds-p-right_small" icon-name="utility:edit" alternative-text="edit" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleEdit}></lightning-icon>
+                                            <lightning-icon icon-name="utility:delete" alternative-text="delete" size="x-small" data-timesheettask-id={taskPerDay.Id} onclick={handleDelete}></lightning-icon>
+                                        </div>  
+                                    </td>
+                                </tr>
+                            </template>-->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="slds-p-around_medium">
+            <div class="button">
+                <lightning-record-edit-form object-api-name="Action__c">
+                    <label for="projectField">Add Project</label>
+                    <lightning-input-field label="Add Project" field-name="Project__c" variant="label-hidden" onchange={handleProjectChange}></lightning-input-field>
+                </lightning-record-edit-form>
+                <lightning-combobox name="task" label="Add Action" value={selectedTaskId} options={taskOptions} onchange={handleTaskChange} variant="label-stack"></lightning-combobox>
+                <div class="slds-p-around_medium">
+                    <lightning-icon icon-name="utility:success" alternative-text="Tick" size="x-small" onclick={handleSave} class="slds-m-around_x-small"></lightning-icon>
+                    <lightning-icon icon-name="utility:close" alternative-text="Close" size="x-small" onclick={handleClose} class="slds-m-around_x-small"></lightning-icon>
+                 </div>
+            </div>
+            </div>
+            <div class="button">
+                <lightning-button label="Save Timesheet" variant="brand" onclick={handleTimesheetData}></lightning-button>
+                <lightning-button label="Save and Submit Timesheet" variant="brand" onclick={handleTimesheetSubmission}></lightning-button>
+                <lightning-button label="Save Suggested Hours"></lightning-button>
+                <lightning-button label="Clone Last Week Hours"></lightning-button>
+                <lightning-button label="Apply Leave" variant="brand" onclick={showLeaveForm}></lightning-button>
+              </div>
+             </lightning-tab>
+             <lightning-tab label="CALENDAR CONVERTER"></lightning-tab>
+         </lightning-tabset>
+      </div>
+    </template>
+    <template if:true={leaveForm}>
+        <div class="leave-align">
+        <div class="slds-p-around_medium slds-grid slds-gutters">
+            <lightning-record-edit-form object-api-name="Day_Time_Entry__c">
+                <label>Day</label>
+                <lightning-input-field field-name="Day__c" variant="label-hidden" onchange={handleDayChange}></lightning-input-field>
+                <label>Date</label>
+                <lightning-input-field field-name="Date__c" variant="label-hidden" onchange={handleDateChange}></lightning-input-field>
+            </lightning-record-edit-form>
+        
+    </div>
+</div>
+    <div class="button">
+        <lightning-button label="Apply Leave" variant="brand" onclick={handleLeaveClick}></lightning-button>
+    </div>
+      </template>
+    </lightning-card>
+ </template>

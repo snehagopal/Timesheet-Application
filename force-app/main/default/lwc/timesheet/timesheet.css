@@ -1,0 +1,63 @@
+.button{
+    display: flex;
+    gap:1rem;
+    margin:20px;
+    cursor:pointer;
+}
+.cursor{
+    cursor:pointer;
+}
+table {
+    border-collapse: separate;
+    border-spacing: 0;
+  }
+.leave-align{
+    align-items: center;
+}
+.col-grey {
+    --slds-c-input-color-background: #A9A9A9;
+    --slds-c-input-color-background-focus:#A9A9A9;
+}
+
+.small-icon {
+    height: 2px;
+    width: 2px;
+  }
+  
+.search {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+}
+.custom-gap {
+    display: flex;
+    align-items: center;
+    column-gap:10px;
+}
+
+.custom-gap h2 {
+    margin: 0;
+}
+
+.user-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background-color: #B6D0E2;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.user-icon lightning-icon {
+    width: 80%;
+    height: 80%;
+    color: #212121;
+    display: flex;
+    justify-content: center;
+}
